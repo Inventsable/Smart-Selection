@@ -15,9 +15,6 @@
   height: auto;
 }
 
-.adobe-inputGroupRow:first-child {
-  margin-top: .5rem;
-}
 
 .selectNode {
   z-index: 10;
@@ -38,11 +35,26 @@
   width: 79.25%;
 }
 
-.adobe-inputGroupRow {
+.adobe-inputGroup {
+  /* flex-direction: column; */
+}
+
+.adobe-inputGroupRow, .inputMulti {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
 }
+
+.inputMulti {
+  width: 100%;
+  margin: .25rem;
+}
+
+.adobe-inputGroupRow{
+  width: 45%;
+}
+
 
 .selectNode:hover{
   background-color: var(--colorHover);

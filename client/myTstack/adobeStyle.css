@@ -117,12 +117,9 @@ body {
 }
 
 .adobe-inputGroup {
-  /* border: 2px solid red; */
-  /* display: inline-block; */
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  /* max-height: var(--inputHeight); */
 }
 
 .adobe-inputGroup-suffix {

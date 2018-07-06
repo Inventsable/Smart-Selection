@@ -15,6 +15,15 @@ var err = {
   ifIs: 0
 };
 
+
+function selectScanner() {
+  if (app.selection.length > 1) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
 JSXEvent(err, "com.init")
 
 function runScript(path) {
@@ -28,7 +37,6 @@ function runScript(path) {
 function console(evalObj){
   try {
     JSXEvent(evalObj, "com.playwrite.console")
-
   } catch(e) {
     JSXEvent(e, "com.playwrite.error")
   }

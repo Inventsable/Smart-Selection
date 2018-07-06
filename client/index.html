@@ -32,40 +32,44 @@
 
     <div class="selectBox">
       <div class="selectRow">
-        <div class="selectNode"></div>
-        <div class="selectNode"></div>
-        <div class="selectNode"></div>
+        <div id="NW" class="selectNode"></div>
+        <div id="N" class="selectNode"></div>
+        <div id="NE" class="selectNode"></div>
       </div>
       <div class="selectRow">
-        <div class="selectNode"></div>
-        <div class="selectNode"></div>
-        <div class="selectNode"></div>
+        <div id="W" class="selectNode"></div>
+        <div id="Center" class="selectNode"></div>
+        <div id="E" class="selectNode"></div>
       </div>
       <div class="selectRow">
-        <div class="selectNode"></div>
-        <div class="selectNode"></div>
-        <div class="selectNode"></div>
+        <div id="SW" class="selectNode"></div>
+        <div id="S" class="selectNode"></div>
+        <div id="SE" class="selectNode"></div>
       </div>
-      <div class="selectMask"></div>
+      <div id="boundBox" class="selectMask"></div>
     </div>
     <div class="adobe-toolbar">
       <div class="adobe-toolbar-divider"></div>
       <div class="adobe-inputGroup">
-        <div class="adobe-inputGroupRow">
-          <span class="prefix">x</span>
-          <input class="adobe adobe-input adobe-input-2x" id="x" type="text" name="name" value="100">
+        <div class="inputMulti">
+          <div class="adobe-inputGroupRow">
+            <span class="prefix">x</span>
+            <input class="adobe adobe-input adobe-input-md" id="x" type="text" name="name" value="100">
+          </div>
+          <div class="adobe-inputGroupRow">
+            <span class="prefix">y</span>
+            <input class="adobe adobe-input adobe-input-md" id="y" type="text" name="data" value="75">
+          </div>
         </div>
-        <div class="adobe-inputGroupRow">
-          <span class="prefix">y</span>
-          <input class="adobe adobe-input adobe-input-2x" id="y" type="text" name="data" value="75">
-        </div>
-        <div class="adobe-inputGroupRow">
-          <span class="prefix">w</span>
-          <input class="adobe adobe-input adobe-input-2x" id="w" type="text" name="data" value="75">
-        </div>
-        <div class="adobe-inputGroupRow">
-          <span class="prefix">h</span>
-          <input class="adobe adobe-input adobe-input-2x" id="h" type="text" name="data" value="75">
+        <div class="inputMulti">
+          <div class="adobe-inputGroupRow">
+            <span class="prefix">w</span>
+            <input class="adobe adobe-input adobe-input-md" id="w" type="text" name="data" value="75">
+          </div>
+          <div class="adobe-inputGroupRow">
+            <span class="prefix">h</span>
+            <input class="adobe adobe-input adobe-input-md" id="h" type="text" name="data" value="75">
+          </div>
         </div>
       </div>
     </div>
