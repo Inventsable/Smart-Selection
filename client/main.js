@@ -50,7 +50,9 @@ function scanningToggle(state) {
 		timer = setInterval(function(){csInterface.evalScript('selectScanner();', function(a){
       if (a == scanRes) return;
       if (a > 0) {
-        csInterface.evalScript(`getBounds(selection, 'geometricBounds')`, function(e){
+        // csInterface.evalScript(`getBounds(selection, 'geometricBounds')`, function(e){
+        csInterface.evalScript(`getBoundingBox()`, function(e){
+          // console.log(e);
           res = e.split(",");
           for (var m = 0; m < res.length; m++) {
             here = parm[m];
@@ -60,6 +62,7 @@ function scanningToggle(state) {
             input[here].value = res[m];
           };
         })
+
         // sNode.NW.style.borderColor = appUI.color.Focus;
         // sNode.NE.style.borderColor = appUI.color.Focus;
         // sNode.SW.style.borderColor = appUI.color.Focus;
