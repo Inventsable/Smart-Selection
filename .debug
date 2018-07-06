@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExtensionList>
+    <Extension Id="com.smartselection.panel">
+        <HostList>
+            <Host Name="ILST" Port="2000"/>
+            <Host Name="AEFT" Port="2001"/>
+            <Host Name="PHXS" Port="2002"/>
+        </HostList>
+    </Extension>
+</ExtensionList>

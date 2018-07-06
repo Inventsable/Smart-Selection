@@ -1,0 +1,60 @@
+.selectBox {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* border: 2px solid blue; */
+  height: 7rem;
+  flex-wrap: wrap;
+}
+
+.selectRow {
+  display: flex;
+  justify-content: space-between;
+  /* border: 2px solid red; */
+  width: 100%;
+  height: auto;
+}
+
+.adobe-inputGroupRow:first-child {
+  margin-top: .5rem;
+}
+
+.selectNode {
+  z-index: 10;
+  border: 2px solid var(--colorBorder);
+  background-color: var(--colorPanelBG);
+  width: .5rem;
+  height: .5rem;
+  cursor: pointer;
+}
+
+.selectMask {
+  z-index: 0;
+  border: 2px solid var(--colorBorder);
+  top: 3.75rem;
+  left: 8.75%;
+  position: absolute;
+  height: 6rem;
+  width: 79.25%;
+}
+
+.adobe-inputGroupRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.selectNode:hover{
+  background-color: var(--colorHover);
+  border-color: var(--colorIcon);
+}
+
+.prefix {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-right: .25rem;
+  color: rgba(255,255,255,.2);
+  width: 1rem;
+  user-select: none;
+}
