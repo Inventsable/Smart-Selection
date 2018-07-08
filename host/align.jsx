@@ -16,7 +16,7 @@ function alignArtboardToSelection(){
   if (Sel.length > 0) {
     var abIdx = aDoc.artboards.getActiveArtboardIndex();
     var actAbBds = aDoc.artboards[abIdx].artboardRect;
-
+    var resRect = [];
     var vBounds = Sel[0].visibleBounds;
     vBounds_Li = vBounds[0];
     vBounds_Ob = vBounds[1];
@@ -31,12 +31,15 @@ function alignArtboardToSelection(){
         if( vBounds_Re < vBdsI[2] ) {vBounds_Re = vBdsI[2]};
         if( vBounds_Un > vBdsI[3] ) {vBounds_Un = vBdsI[3]};
       }
+      var newRect = [vBounds_Li +((vBounds_Re - vBounds_Li)/2-(actAbBds[2]-actAbBds[0])/2), vBounds_Ob -((vBounds_Ob - vBounds_Un)/2+(actAbBds[3]-actAbBds[1])/2), vBounds_Li +((vBounds_Re - vBounds_Li)/2-(actAbBds[2]-actAbBds[0])/2)+(actAbBds[2]-actAbBds[0]), vBounds_Ob -((vBounds_Ob - vBounds_Un)/2+(actAbBds[3]-actAbBds[1])/2)+(actAbBds[3]-actAbBds[1])];
+      resRect.push(newRect);
 
-      aDoc.artboards[abIdx].artboardRect = [vBounds_Li +((vBounds_Re - vBounds_Li)/2-(actAbBds[2]-actAbBds[0])/2), vBounds_Ob -((vBounds_Ob - vBounds_Un)/2+(actAbBds[3]-actAbBds[1])/2), vBounds_Li +((vBounds_Re - vBounds_Li)/2-(actAbBds[2]-actAbBds[0])/2)+(actAbBds[2]-actAbBds[0]), vBounds_Ob -((vBounds_Ob - vBounds_Un)/2+(actAbBds[3]-actAbBds[1])/2)+(actAbBds[3]-actAbBds[1])];
+      // aDoc.artboards[abIdx].artboardRect = [vBounds_Li +((vBounds_Re - vBounds_Li)/2-(actAbBds[2]-actAbBds[0])/2), vBounds_Ob -((vBounds_Ob - vBounds_Un)/2+(actAbBds[3]-actAbBds[1])/2), vBounds_Li +((vBounds_Re - vBounds_Li)/2-(actAbBds[2]-actAbBds[0])/2)+(actAbBds[2]-actAbBds[0]), vBounds_Ob -((vBounds_Ob - vBounds_Un)/2+(actAbBds[3]-actAbBds[1])/2)+(actAbBds[3]-actAbBds[1])];
     }
   } else {
     alert ("No selection");
   }
+  return resRect;
 }
 
 // alignSelection();
@@ -57,7 +60,38 @@ function alignSelection(){
 
 // alert(getBBox());
 
-getBoundingBox();
+// getBoundingBox();
+
+// alert(getFullSizes())
+// alert(getBounds(selection, 'geometricBounds'))
+
+function getFullSizes(){
+  var x, y, w, h;
+  var bBox = [];
+  for (var i = 0; i < app.selection.length; i++) {
+    var trueRect = [];
+    var rect = []
+    var target = app.selection[i];
+    var bounds = target.geometricBounds;
+    for (var a = 0; a < bounds.length; a++) {
+      if (bounds[a] < 0)
+        bounds[a] = bounds[a]*(-1);
+      rect.push(bounds[a])
+    }
+    x = rect[0];
+    y = rect[1];
+    w = rect[2];
+    h = rect[3];
+    // w = rect[0] - rect[2];
+    // w = (w < 0) ? (w*(-1)) : (w)
+    // h = rect[0] - rect[2];
+    // h = (h < 0) ? (h*(-1)) : (h)
+    // h = ((rect[1] - rect[3]) < 0) ? ((rect[1] - rect[3])*(-1)) : (rect[1] - rect[3])
+    trueRect.push(x, y, w, h)
+    bBox.push(trueRect);
+  }
+  return bBox;
+}
 
 function getTrueSizes(){
   var x, y, w, h;
@@ -74,8 +108,11 @@ function getTrueSizes(){
     }
     x = rect[0];
     y = rect[1];
-    w = ((rect[0] - rect[2]) < 0) ? ((rect[0] - rect[2])*(-1)) : (rect[0] - rect[2])
-    h = ((rect[1] - rect[3]) < 0) ? ((rect[1] - rect[3])*(-1)) : (rect[1] - rect[3])
+    w = rect[0] - rect[2];
+    w = (w < 0) ? (w*(-1)) : (w)
+    h = rect[0] - rect[2];
+    h = (h < 0) ? (h*(-1)) : (h)
+    // h = ((rect[1] - rect[3]) < 0) ? ((rect[1] - rect[3])*(-1)) : (rect[1] - rect[3])
     trueRect.push(x, y, w, h)
     group.push(trueRect);
   }
@@ -85,9 +122,15 @@ function getTrueSizes(){
 // alert(getBoundingBox())
 
 function getBoundingBox() {
+  var fullBox = getFullSizes();
   var grp = getTrueSizes();
   var width, height;
   // iterate through objects to find numbers based on value and not selection order
+  for (var u = 0; u < app.selection.length; u++) {
+    var max_of_array = Math.max.apply(Math, grp[u]);
+    alert(max_of_array);
+  }
+
   width = (grp[0][0] - (grp[1][0] + grp[1][2]));
   height = (grp[0][1] - (grp[1][1] + grp[1][3]));
   width = (width < 0) ? width * (-1) : width;
@@ -99,25 +142,8 @@ function getBoundingBox() {
 
 // alert(getBounds(selection, 'geometricBounds'))
 
-/** @Alexander Ladygin
-https://forums.adobe.com/thread/2109761  **/
-function getBounds(arr, bounds) {
-    var x = [], y = [], w = [], h = [],
-        bounds = bounds || 'geometricBounds';
 
-    for ( var i = 0; i < arr.length; i++ ) {
-        x.push(arr[i][bounds][0]);
-        y.push(arr[i][bounds][1]);
-        w.push(arr[i][bounds][2]);
-        h.push(arr[i][bounds][3]);
-    }
 
-    x = Math.min.apply(null, x);
-    y = Math.max.apply(null, y);
-    w = Math.max.apply(null, w);
-    h = Math.min.apply(null, h);
-    return rect = [ x, y, w, h ];
-};
 
 // var selectionXY = [ app.activeDocument.selection.bounds[0].as('px'),
 //     app.activeDocument.selection.bounds[1].as('px') ];

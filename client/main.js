@@ -5,6 +5,7 @@ var logPath = sysPath + "/log/";
 var hostPath = sysPath + "/host/";
 var appName = csInterface.hostEnvironment.appName;
 
+
 var sNode = {
   NW:null,
   N:null,
@@ -21,13 +22,21 @@ for (var d in sNode) {
   sNode[d] = this[d];
 }
 
-var input = {
-  x:null,
-  y:null,
-  w:null,
-  h:null
-};
 
+var input = {
+  x1:null,
+  y1:null,
+  x2:null,
+  y2:null,
+  w:null,
+  h:null,
+  aX:null,
+  aY:null,
+  aW:null,
+  aH:null,
+  nX:null,
+  nY:null,
+};
 for (var e in input) {
   input[e] = this[e];
 }
@@ -35,56 +44,75 @@ for (var e in input) {
 
 loadUniversalJSXLibraries();
 console.log(`Loading for ${appName}`);
-loadJSX(`align.jsx`);
+loadJSX(`smartAlign.jsx`);
 loadJSX(`${appName}.jsx`);
 console.log(appUI);
-var scanRes;
-scanningToggle(true);
+var scanSel, scanAB, lastA;
+scanningSelection(true);
+scanningArtboard(true);
 
 
-
-function scanningToggle(state) {
+function scanningArtboard(state) {
   var res, here;
-  var parm = ["x", "y", "w", "h"];
+  // var parm = ["aW", "aH"]
+  if (state) {
+		timerAB = setInterval(function(){csInterface.evalScript('scanCurrentArtboard();', function(a){
+      if (a == scanAB) return;
+      if (a !== scanAB) {
+        console.log('Artboard changed');
+        csInterface.evalScript(`updateArtboardDimensions(${a});`, function(aa){
+          var newDimen = aa.split(',');
+          input.aX.value = newDimen[0];
+          input.aY.value = newDimen[1];
+          input.aW.value = newDimen[2];
+          input.aH.value = newDimen[3];
+        });
+      }
+      scanAB = a;
+    })}, 50);
+    console.log("Scanning artboard on");
+	} else {
+		clearInterval(timerAB);
+		console.log("Scanning artboard off");
+	}
+}
+
+function scanningSelection(state) {
+  var res, here;
+  var parm = ["x1", "y1", "x2", "y2", "w", "h"];
 	if (state) {
 		timer = setInterval(function(){csInterface.evalScript('selectScanner();', function(a){
-      if (a == scanRes) return;
+      if (a == scanSel) return;
       if (a > 0) {
-        // csInterface.evalScript(`getBounds(selection, 'geometricBounds')`, function(e){
-        csInterface.evalScript(`getBoundingBox()`, function(e){
-          // console.log(e);
+        csInterface.evalScript(`getBounds(selection, 'geometricBounds')`, function(e){
+        // csInterface.evalScript(`getBoundingBox()`, function(e){
           res = e.split(",");
           for (var m = 0; m < res.length; m++) {
             here = parm[m];
             console.log(`${here}:${res[m]}`);
             if (res[m] < 0)
-            res[m] = res[m]*(-1);
-            input[here].value = res[m];
+              res[m] = res[m]*(-1);
+            input[here].value = parseFloat(res[m]);
           };
         })
 
-        // sNode.NW.style.borderColor = appUI.color.Focus;
-        // sNode.NE.style.borderColor = appUI.color.Focus;
-        // sNode.SW.style.borderColor = appUI.color.Focus;
-        // sNode.SE.style.borderColor = appUI.color.Focus;
-        sNode.Center.style.borderColor = appUI.color.Focus;
+        sNode.NW.style.borderColor = appUI.color.Focus;
+        sNode.SE.style.borderColor = appUI.color.Focus;
         sNode.boundBox.style.borderColor = appUI.color.Focus;
       } else {
-        res = ["", "", "", ""];
-        // sNode.NW.style.borderColor = appUI.color.Border;
-        // sNode.NE.style.borderColor = appUI.color.Border;
-        // sNode.SW.style.borderColor = appUI.color.Border;
-        // sNode.SE.style.borderColor = appUI.color.Border;
-        sNode.Center.style.borderColor = appUI.color.Border;
+        res = ["", "", "", "", "", ""];
+        sNode.NW.style.borderColor = appUI.color.Border;
+        sNode.SE.style.borderColor = appUI.color.Border;
         sNode.boundBox.style.borderColor = appUI.color.Border;
         console.log("Nothing selected");
       }
-      for (var m = 0; m < res.length; m++) {
-        here = parm[m];
-        console.log(`${here}:${res[m]}`);
-        input[here].value = res[m];
-      };
-      scanRes = a;
+      try {
+        for (var m = 0; m < res.length; m++) {
+          here = parm[m];
+          input[here].value = res[m];
+        };
+      } catch(e){return}
+      scanSel = a;
     })}, 50);
 		console.log("Scanning on");
 	} else {
@@ -92,3 +120,32 @@ function scanningToggle(state) {
 		console.log("Scanning off");
 	}
 }
+
+function getCoords(node) {
+  var resultX, resultY;
+  if ((node == 'N') || (node == 'Center') || (node == 'S')) {
+    resultX = parseInt((input.w.value/2)) + parseInt(input.x1.value);
+  } else if ((node == 'NE') || (node == 'E') || (node == 'SE')) {
+    resultX = parseInt(input.w.value) + parseInt(input.x1.value);
+  } else {
+    resultX = parseInt(input.x1.value);
+  }
+  if ((node == 'NW') || (node == 'N') || (node == 'NE')) {
+    resultY = parseInt(input.y1.value);
+  } else if ((node == 'W') || (node == 'Center') || (node == 'E')) {
+    resultY = parseInt((input.h.value/2)) + parseInt(input.y1.value);
+  } else {
+    resultY = parseInt(input.h.value) + parseInt(input.y1.value);
+  }
+  input.nX.value = resultX;
+  input.nY.value = resultY;
+}
+
+var node = [].slice.call(document.getElementsByClassName('selectNode'));
+node.forEach(function(v,i,a) {
+  v.addEventListener("click", function(e){
+    getCoords(v.id);
+  }, false)
+})
+
+// var nodeN = document.getElementById('N');

@@ -28,7 +28,7 @@
 .selectMask {
   z-index: 0;
   border: 2px solid var(--colorBorder);
-  top: 3.75rem;
+  top: 1.65rem;
   left: 8.75%;
   position: absolute;
   height: 6rem;
