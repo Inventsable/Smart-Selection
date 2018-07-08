@@ -128,7 +128,7 @@ function getBoundingBox() {
   // iterate through objects to find numbers based on value and not selection order
   for (var u = 0; u < app.selection.length; u++) {
     var max_of_array = Math.max.apply(Math, grp[u]);
-    alert(max_of_array);
+    // alert(max_of_array);
   }
 
   width = (grp[0][0] - (grp[1][0] + grp[1][2]));

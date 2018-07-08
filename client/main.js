@@ -41,6 +41,33 @@ for (var e in input) {
   input[e] = this[e];
 }
 
+var coords = {
+  rel : {
+    x1:null,
+    y1:null,
+    x2:null,
+    y2:null,
+    w:null,
+    h:null,
+  },
+  artB : {
+    x1:null,
+    y1:null,
+    x2:null,
+    y2:null,
+    w:null,
+    h:null,
+  },
+  abs : {
+    x1:null,
+    y1:null,
+    x2:null,
+    y2:null,
+    w:null,
+    h:null,
+  },
+};
+
 
 loadUniversalJSXLibraries();
 console.log(`Loading for ${appName}`);
@@ -54,6 +81,7 @@ scanningArtboard(true);
 
 function scanningArtboard(state) {
   var res, here;
+  var parm = ["x1", "y1", "w", "h"];
   // var parm = ["aW", "aH"]
   if (state) {
 		timerAB = setInterval(function(){csInterface.evalScript('scanCurrentArtboard();', function(a){
@@ -61,11 +89,18 @@ function scanningArtboard(state) {
       if (a !== scanAB) {
         console.log('Artboard changed');
         csInterface.evalScript(`updateArtboardDimensions(${a});`, function(aa){
-          var newDimen = aa.split(',');
-          input.aX.value = newDimen[0];
-          input.aY.value = newDimen[1];
-          input.aW.value = newDimen[2];
-          input.aH.value = newDimen[3];
+          var res = aa.split(',');
+          for (var m = 0; m < res.length; m++) {
+            here = parm[m];
+            coords.artB[here] = parseInt(res[m]);
+          };
+          input.aX.value = parseInt(res[0]);
+          input.aY.value = parseInt(res[1]);
+          input.aW.value = parseInt(res[2]);
+          input.aH.value = parseInt(res[3]);
+          coords.artB.x2 = parseInt(coords.artB.x1) + parseInt(coords.artB.w);
+          coords.artB.y2 = parseInt(coords.artB.y1) + parseInt(coords.artB.h);
+          console.log(coords.artB);
         });
       }
       scanAB = a;
@@ -78,40 +113,10 @@ function scanningArtboard(state) {
 }
 
 function scanningSelection(state) {
-  var res, here;
-  var parm = ["x1", "y1", "x2", "y2", "w", "h"];
 	if (state) {
 		timer = setInterval(function(){csInterface.evalScript('selectScanner();', function(a){
       if (a == scanSel) return;
-      if (a > 0) {
-        csInterface.evalScript(`getBounds(selection, 'geometricBounds')`, function(e){
-        // csInterface.evalScript(`getBoundingBox()`, function(e){
-          res = e.split(",");
-          for (var m = 0; m < res.length; m++) {
-            here = parm[m];
-            console.log(`${here}:${res[m]}`);
-            if (res[m] < 0)
-              res[m] = res[m]*(-1);
-            input[here].value = parseFloat(res[m]);
-          };
-        })
-
-        sNode.NW.style.borderColor = appUI.color.Focus;
-        sNode.SE.style.borderColor = appUI.color.Focus;
-        sNode.boundBox.style.borderColor = appUI.color.Focus;
-      } else {
-        res = ["", "", "", "", "", ""];
-        sNode.NW.style.borderColor = appUI.color.Border;
-        sNode.SE.style.borderColor = appUI.color.Border;
-        sNode.boundBox.style.borderColor = appUI.color.Border;
-        console.log("Nothing selected");
-      }
-      try {
-        for (var m = 0; m < res.length; m++) {
-          here = parm[m];
-          input[here].value = res[m];
-        };
-      } catch(e){return}
+      scanResults(a);
       scanSel = a;
     })}, 50);
 		console.log("Scanning on");
@@ -120,6 +125,52 @@ function scanningSelection(state) {
 		console.log("Scanning off");
 	}
 }
+
+function scanResults(a) {
+  var res, here, type;
+  var parm = ["x1", "y1", "x2", "y2", "w", "h"];
+  if (a > 0) {
+    csInterface.evalScript(`getBounds(selection, 'geometricBounds')`, function(e){
+      // csInterface.evalScript(`getBoundingBox()`, function(e){
+      type = e.split(";")
+      res = type[0].split(",");
+      for (var m = 0; m < res.length; m++) {
+        if (res[m] == null) {
+          continue;
+        }
+        here = parm[m];
+        coords.rel[here] = parseInt(res[m]);
+        input[here].value = parseInt(res[m]);
+      };
+      absRes = type[1].split(",");
+      for (var m = 0; m < absRes.length; m++) {
+        if (res[m] == null) {
+          break;
+        }
+        here = parm[m];
+        coords.abs[here] = parseInt(absRes[m])
+      };
+      console.log(coords.rel);
+      console.log(coords.abs);
+    })
+    sNode.NW.style.borderColor = appUI.color.Focus;
+    sNode.SE.style.borderColor = appUI.color.Focus;
+    sNode.boundBox.style.borderColor = appUI.color.Focus;
+  } else {
+    res = ["", "", "", "", "", ""];
+    sNode.NW.style.borderColor = appUI.color.Border;
+    sNode.SE.style.borderColor = appUI.color.Border;
+    sNode.boundBox.style.borderColor = appUI.color.Border;
+    // console.log("Nothing selected");
+  }
+  try {
+    for (var m = 0; m < res.length; m++) {
+      here = parm[m];
+      input[here].value = res[m];
+    };
+  } catch(e){return}
+}
+
 
 function getCoords(node) {
   var resultX, resultY;
