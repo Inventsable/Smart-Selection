@@ -44,19 +44,7 @@ function alignArtboardToSelection(){
 
 // alignSelection();
 
-/** @TenA
-https://forums.adobe.com/thread/2111711  **/
-function alignSelection(){
-  var refBnds = app.activeDocument.selection[0].geometricBounds;
-  for (var i = 0; i < app.selection.length; i++) {
-    var target = app.selection[i];
-    var ct = refBnds[0] + (refBnds[2] - refBnds[0]) / 2;
-    var md = refBnds[1] + (refBnds[3] - refBnds[1]) / 2;
-    var wd = target.width;
-    var ht = target.height;
-    target.position = [ct - wd / 2, md + ht / 2];
-  }
-}
+
 
 // alert(getBBox());
 
