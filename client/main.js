@@ -55,6 +55,7 @@ var coords = {
     y2:null,
     w:null,
     h:null,
+    index:null,
   },
   abs : {
     x1:null,
@@ -64,6 +65,7 @@ var coords = {
     w:null,
     h:null,
   },
+  which: "selection"
 };
 
 loadUniversalJSXLibraries();
@@ -78,7 +80,7 @@ scanningArtboard(true);
 
 function scanningArtboard(state) {
   var res, here;
-  var parm = ["x1", "y1", "w", "h"];
+  var parm = ["x1", "y1", "x2", "y2", "w", "h", "index"];
   if (state) {
 		timerAB = setInterval(function(){csInterface.evalScript('scanCurrentArtboard();', function(a){
       if (a == scanAB) return;
@@ -92,10 +94,9 @@ function scanningArtboard(state) {
           };
           input.aX.value = parseInt(res[0]);
           input.aY.value = parseInt(res[1]);
-          input.aW.value = parseInt(res[2]);
-          input.aH.value = parseInt(res[3]);
-          coords.artB.x2 = parseInt(coords.artB.x1) + parseInt(coords.artB.w);
-          coords.artB.y2 = parseInt(coords.artB.y1) + parseInt(coords.artB.h);
+          input.aW.value = parseInt(res[4]);
+          input.aH.value = parseInt(res[5]);
+          // console.log(coords.artB);
         });
       }
       scanAB = a;
@@ -140,7 +141,6 @@ function scanResults(a) {
         here = parm[m];
         coords.abs[here] = parseInt(absRes[m])
       };
-      console.log(coords.abs);
     })
     sNode.NW.style.borderColor = appUI.color.Focus;
     sNode.SE.style.borderColor = appUI.color.Focus;
@@ -184,7 +184,18 @@ var node = [].slice.call(document.getElementsByClassName('selectNode'));
 node.forEach(function(v,i,a) {
   v.addEventListener("click", function(e){
     getCoords(v.id);
-    csInterface.evalScript(`alignSelection('selection', '${v.id}', ${coords.abs.x1}, ${coords.abs.y1}, ${coords.abs.x2}, ${coords.abs.y2})`);
-    console.log(e);
+    var yOff;
+
+    if (e.shiftKey) {
+      console.log(coords.artB);
+      yOff = (coords.artB.index < 1) ? coords.artB.y2 * -1 : coords.artB.y2;
+      csInterface.evalScript(`alignSelection('artboard', '${v.id}', ${coords.artB.x1}, ${coords.artB.y1}, ${coords.artB.x2}, ${yOff})`);
+    } else {
+      console.log(coords.abs);
+      console.log(coords.rel);
+      yOff = (coords.abs.index < 1) ? coords.rel.y2 : coords.abs.y2;
+      csInterface.evalScript(`alignSelection('selection', '${v.id}', ${coords.abs.x1}, ${coords.abs.y1}, ${coords.abs.x2}, ${yOff})`);
+    }
+    // console.log(e);
   }, false)
 })

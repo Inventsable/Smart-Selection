@@ -32,9 +32,10 @@ function updateArtboardDimensions(index){
     h = (relAB[1] - relAB[3]);
   w = (w < 0) ? (w*(-1)) : w;
   h = (h < 0) ? (h*(-1)) : h;
-  lastABOffset = [ parseInt((absAB[0] * -1)), parseInt(absAB[1]), thisAB  ]
-  // return rect = [ absAB[0], absAB[1], absAB[2], absAB[3], w, h ];
-  return rect = [ absAB[0], absAB[1], w, h ];
+  lastABOffset = [ parseInt((absAB[0] * -1)), parseInt(absAB[1]), thisAB ]
+  absAB[1] = (absAB[1] * (-1));
+  return rect = [ absAB[0], absAB[1], absAB[2], absAB[3], w, h, thisAB ];
+  // return rect = [ absAB[0], absAB[1], w, h ];
 }
 
 
@@ -63,7 +64,7 @@ function getBounds(arr, bounds) {
     w = x2 - x1;
     h = y2 - y1;
 
-    // absolute position of selection bounding box
+    // reverse and store for absolute position of selection
     if (thisAB > 0) {
       absX1 = (lastABOffset[0] * -1) + x1;
       absX2 = (lastABOffset[0] * -1) + x2;
@@ -76,21 +77,27 @@ function getBounds(arr, bounds) {
       absY2 = y2;
     }
 
+    // send two arrays with ; delimiter
     return rect = [ x1, y1, x2, y2, w, h ] + ";" + [ absX1, absY1, absX2, absY2, w, h ];
 };
 
 
-// alignSelection('selection', 'center', 0, 0, 100, 100)
+alignSelection('selection', 'Center', 20, 25, 100, 100)
 
 /** @TenA
 https://forums.adobe.com/thread/2111711  **/
 function alignSelection(alignType, alignTo, x1, y1, x2, y2) {
   var refBnds;
+  var inverted = false;
   if (alignType === 'selectionKey') {
     refBnds = app.activeDocument.selection[0].geometricBounds;
   } else {
     refBnds = [ x1, y1, x2, y2 ]
   }
+  // if (alignType === 'artboard') {
+    if (thisDoc.artboards.getActiveArtboardIndex() < 1)
+      inverted = true;
+  // }
 
   var minX = refBnds[0];
   var minY = refBnds[1];
@@ -116,9 +123,12 @@ function alignSelection(alignType, alignTo, x1, y1, x2, y2) {
     var wd = target.width;
     var ht = target.height;
     var bounds = target.geometricBounds;
-    var gridCenter = [midX - wd / 2, midY + ht / 2];
     if (alignTo === 'Center') {
-      target.position = [midX - wd / 2, midY + ht / 2];
+      if (inverted){
+        target.position = [midX - wd / 2, (midY - ht / 2) * -1];
+      } else {
+        target.position = [midX - wd / 2, midY + ht / 2];
+      }
     } else {
       alert(alignTo)
     }
