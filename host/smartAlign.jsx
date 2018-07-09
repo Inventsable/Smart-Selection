@@ -82,22 +82,20 @@ function getBounds(arr, bounds) {
 };
 
 
-alignSelection('selection', 'Center', 20, 25, 100, 100)
+// alignSelection('selection', 'Center', 20, 25, 100, 100)
 
 /** @TenA
 https://forums.adobe.com/thread/2111711  **/
-function alignSelection(alignType, alignTo, x1, y1, x2, y2) {
+function alignSelection(alignType, alignTarget, alignCompass, x1, y1, x2, y2) {
   var refBnds;
   var inverted = false;
-  if (alignType === 'selectionKey') {
+  if (alignTarget === 'selectionKey') {
     refBnds = app.activeDocument.selection[0].geometricBounds;
   } else {
     refBnds = [ x1, y1, x2, y2 ]
   }
-  // if (alignType === 'artboard') {
-    if (thisDoc.artboards.getActiveArtboardIndex() < 1)
-      inverted = true;
-  // }
+  if (thisDoc.artboards.getActiveArtboardIndex() < 1)
+    inverted = true;
 
   var minX = refBnds[0];
   var minY = refBnds[1];
@@ -105,35 +103,133 @@ function alignSelection(alignType, alignTo, x1, y1, x2, y2) {
   var maxY = refBnds[3];
   var midX = (minX + (maxX - minX) / 2);
   var midY = (minY + (maxY - minY) / 2);
+  var boxW = maxX - minX;
+  var boxH = maxY - minY;
 
-  var grid = {
-    NW: [minX, minY],
-    N: [midX, minY],
-    NE: [maxX, minY],
-    W: [minX, midY],
-    Center: [midX, midY],
-    E: [maxX, midY],
-    SW: [minX, maxY],
-    S: [midX, maxY],
-    SE: [maxX, maxY]
-  };
+  // alert(minX + ' ' + minY + " " + maxX + " " + maxY + "\r" + midX + " " + midY)
+
 
   for (var i = 0; i < app.selection.length; i++) {
     var target = app.selection[i];
     var wd = target.width;
     var ht = target.height;
     var bounds = target.geometricBounds;
-    if (alignTo === 'Center') {
-      if (inverted){
-        target.position = [midX - wd / 2, (midY - ht / 2) * -1];
-      } else {
-        target.position = [midX - wd / 2, midY + ht / 2];
+    if (alignType === 'align') {
+      switch(alignCompass){
+        case 'NW':
+          if (inverted)
+            target.position = [minX, minY * -1];
+          else
+            target.position = [minX, minY];
+          break;
+        case 'N':
+          if (inverted)
+            target.position = [midX - wd / 2, minY * -1];
+          else
+            target.position = [midX - wd / 2, minY];
+          break;
+        case 'NE':
+          if (inverted)
+            target.position = [maxX - wd, minY * -1];
+          else
+            target.position = [maxX - wd, minY];
+          break;
+        case 'W':
+          if (inverted)
+            target.position = [minX, (midY - ht / 2) * -1];
+          else
+            target.position = [minX, midY + ht / 2];
+          break;
+        case 'Center':
+          if (inverted)
+            target.position = [midX - wd / 2, (midY - ht / 2) * -1];
+          else
+            target.position = [midX - wd / 2, midY + ht / 2];
+          break;
+        case 'E':
+          if (inverted)
+            target.position = [maxX - wd, (midY - ht / 2) * -1];
+          else
+            target.position = [maxX - wd, midY + ht / 2];
+          break;
+        case 'SW':
+          if (inverted)
+            target.position = [minX, (maxY - ht) * -1];
+          else
+            target.position = [minX, maxY + ht];
+          break;
+        case 'S':
+          if (inverted)
+            target.position = [midX - wd / 2, (maxY - ht) * -1];
+          else
+            target.position = [midX - wd / 2, maxY + ht];
+          break;
+        case 'SE':
+          if (inverted)
+            target.position = [maxX - wd, (maxY - ht) * -1];
+          else
+            target.position = [maxX - wd, maxY + ht];
+          break;
+        case 'xAxis':
+          if (inverted)
+            target.position = [bounds[0], (midY - ht) * -1];
+          else
+            target.position = [bounds[0], maxY - ht];
+          break;
+        case 'yAxis':
+          if (inverted)
+            target.position = [midX - wd / 2, bounds[1]];
+          else
+            target.position = [midX - wd / 2, bounds[1]];
+          break;
+        default:
+          alert(alignCompass);
+          break;
       }
     } else {
-      alert(alignTo)
+      var first = 0;
+      var last = app.selection.length - 1;
+      var startX = app.selection[0].width + minX;
+      var endX = maxX - app.selection[last].width;
+      var startY = app.selection[0].height + minY;
+      var endY = maxY - app.selection[last].height;
+      var blendRect = [startX, startY, endX, endY];
+      var blendW = blendRect[2] - blendRect[0];
+      var blendH = blendRect[3] - blendRect[1];
+      var childrenW = 0;
+      var childrenH = 0;
+      for (var ii = 1; ii < app.selection.length - 1; ii++) {
+        childrenW = childrenW + app.selection[ii].width;
+        childrenH = childrenH + app.selection[ii].height;
+      }
+      var remainderW = blendW - childrenW;
+      var remainderH = blendH - childrenH;
+      var offsetWNum = remainderW / (app.selection.length - 1);
+      var offsetHNum = remainderH / (app.selection.length - 1);
+      switch(alignCompass){
+        case 'Center':
+          if (inverted) {
+            if (i == first) {
+              target.position = [minX, minY];
+            } else if (i == last) {
+              target.position = [maxX - wd, (maxY * -1) + ht];
+            } else {
+              // target.position = [startX + (offsetWNum * i) - (wd / 2), ((offsetHNum * i) - (ht / 2)) * -1];
+              target.position = [startX + (offsetWNum * i) + (wd / 2), (startY + (offsetHNum * i) + (ht / 2)) * -1];
+            }
+          } else {
+            // target.position = [minX + (offsetWNum * i), minY];
+          }
+          break;
+
+      }
     }
   }
 }
+
+// alert(app.selection[app.selection.length - 1].width - app.selection[0].width)
+
+// alignSelection('distribute', 'selection', 'Center', 0, 0, 100, 100)
 
 
 function roundTo(n, digits) {

@@ -185,16 +185,16 @@ node.forEach(function(v,i,a) {
   v.addEventListener("click", function(e){
     getCoords(v.id);
     var yOff;
-
     if (e.shiftKey) {
       console.log(coords.artB);
       yOff = (coords.artB.index < 1) ? coords.artB.y2 * -1 : coords.artB.y2;
-      csInterface.evalScript(`alignSelection('artboard', '${v.id}', ${coords.artB.x1}, ${coords.artB.y1}, ${coords.artB.x2}, ${yOff})`);
+      csInterface.evalScript(`alignSelection('align', 'artboard', '${v.id}', ${coords.artB.x1}, ${coords.artB.y1}, ${coords.artB.x2}, ${yOff})`);
+    } else if (e.altKey) {
+      yOff = (coords.abs.index < 1) ? coords.abs.y2 * -1 : coords.abs.y2;
+      csInterface.evalScript(`alignSelection('distribute', 'selection', '${v.id}', ${coords.abs.x1}, ${coords.abs.y1}, ${coords.abs.x2}, ${yOff})`);
     } else {
-      console.log(coords.abs);
-      console.log(coords.rel);
       yOff = (coords.abs.index < 1) ? coords.rel.y2 : coords.abs.y2;
-      csInterface.evalScript(`alignSelection('selection', '${v.id}', ${coords.abs.x1}, ${coords.abs.y1}, ${coords.abs.x2}, ${yOff})`);
+      csInterface.evalScript(`alignSelection('align', 'selection', '${v.id}', ${coords.abs.x1}, ${coords.abs.y1}, ${coords.abs.x2}, ${yOff})`);
     }
     // console.log(e);
   }, false)

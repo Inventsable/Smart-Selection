@@ -1,5 +1,5 @@
 ## Smart Selection
 
-Helper panel for identifying the nodes of current selection's bounding box and functions for Smart Align.
+Helper panel to build Smart Align functions:
 
-![Selection toggle](https://thumbs.gfycat.com/CompetentRequiredHoneybee-size_restricted.gif)
+![Selection toggle](https://thumbs.gfycat.com/ReadyLividFrogmouth-size_restricted.gif)
