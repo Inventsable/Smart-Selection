@@ -81,8 +81,110 @@ function getBounds(arr, bounds) {
     return rect = [ x1, y1, x2, y2, w, h ] + ";" + [ absX1, absY1, absX2, absY2, w, h ];
 };
 
-
+// alert(app.documents[0].artboards[0].artboardRect)
+// alignSingleToArtboard('NE');
 // alignSelection('selection', 'Center', 20, 25, 100, 100)
+
+function alignSingleToArtboard(alignCompass, x1, y1, x2, y2) {
+  // var currAB = app.documents[0].activeArtboard;
+  var inverted = false;
+  var indexAB = app.documents[0].artboards.getActiveArtboardIndex();
+  var boundsAB = app.documents[0].artboards[indexAB].artboardRect;
+
+  // alert()
+
+  if (indexAB < 1)
+    inverted = true;
+
+  var minX = x1;
+  var maxX = x2;
+  var minY = y1;
+  var maxY = y2;
+
+  // var minX = boundsAB[0];
+  // var maxX = boundsAB[2];
+  // var minY = boundsAB[1];
+  // var maxY = boundsAB[3] * -1;
+
+  var midX = (minX + (maxX - minX) / 2);
+  var midY = (minY + (maxY - minY) / 2);
+
+  var target = app.selection[0];
+  var wd = target.width;
+  var ht = target.height;
+  switch(alignCompass){
+    case 'NW':
+      if (inverted)
+        target.position = [minX, minY * -1];
+      else
+        target.position = [minX, minY];
+      break;
+    case 'N':
+      if (inverted)
+        target.position = [midX - wd / 2, minY * -1];
+      else
+        target.position = [midX - wd / 2, minY];
+      break;
+    case 'NE':
+      if (inverted)
+        target.position = [maxX - wd, minY * -1];
+      else
+        target.position = [maxX - wd, minY];
+      break;
+    case 'W':
+      if (inverted)
+        target.position = [minX, (midY - ht / 2) * -1];
+      else
+        target.position = [minX, midY + ht / 2];
+      break;
+    case 'Center':
+      if (inverted)
+        target.position = [midX - wd / 2, (midY - ht / 2) * -1];
+      else
+        target.position = [midX - wd / 2, midY + ht / 2];
+      break;
+    case 'E':
+      if (inverted)
+        target.position = [maxX - wd, (midY - ht / 2) * -1];
+      else
+        target.position = [maxX - wd, midY + ht / 2];
+      break;
+    case 'SW':
+      if (inverted)
+        target.position = [minX, (maxY - ht) * -1];
+      else
+        target.position = [minX, maxY + ht];
+      break;
+    case 'S':
+      if (inverted)
+        target.position = [midX - wd / 2, (maxY - ht) * -1];
+      else
+        target.position = [midX - wd / 2, maxY + ht];
+      break;
+    case 'SE':
+      if (inverted)
+        target.position = [maxX - wd, (maxY - ht) * -1];
+      else
+        target.position = [maxX - wd, maxY + ht];
+      break;
+    case 'xAxis':
+      if (inverted)
+        target.position = [bounds[0], (midY - ht) * -1];
+      else
+        target.position = [bounds[0], maxY - ht];
+      break;
+    case 'yAxis':
+      if (inverted)
+        target.position = [midX - wd / 2, bounds[1]];
+      else
+        target.position = [midX - wd / 2, bounds[1]];
+      break;
+    default:
+      alert(alignCompass);
+      break;
+  }
+}
+
 
 /** @TenA
 https://forums.adobe.com/thread/2111711  **/

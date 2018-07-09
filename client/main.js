@@ -4,6 +4,7 @@ var sysPath = csInterface.getSystemPath(SystemPath.EXTENSION);
 var logPath = sysPath + "/log/";
 var hostPath = sysPath + "/host/";
 var appName = csInterface.hostEnvironment.appName;
+var alignSolo, lastNum;
 
 var sNode = {
   NW:null,
@@ -125,38 +126,46 @@ function scanningSelection(state) {
 function scanResults(a) {
   var res, here, type;
   var parm = ["x1", "y1", "x2", "y2", "w", "h"];
-  if (a > 0) {
-    csInterface.evalScript(`getBounds(selection, 'geometricBounds')`, function(e){
-      type = e.split(";")
-      res = type[0].split(",");
+  if (a !== lastNum) {
+    if (a == 1)
+      alignSolo = true;
+    if (a > 0) {
+      if (a > 1) {
+        csInterface.evalScript(`getBounds(selection, 'geometricBounds')`, function(e){
+          alignSolo = false;
+          type = e.split(";")
+          res = type[0].split(",");
+          for (var m = 0; m < res.length; m++) {
+            if (res[m] == null) break;
+            here = parm[m];
+            coords.rel[here] = parseInt(res[m]);
+            input[here].value = parseInt(res[m]);
+          };
+          absRes = type[1].split(",");
+          for (var m = 0; m < absRes.length; m++) {
+            if (res[m] == null) break;
+            here = parm[m];
+            coords.abs[here] = parseInt(absRes[m])
+          };
+        })
+      }
+      sNode.NW.style.borderColor = appUI.color.Focus;
+      sNode.SE.style.borderColor = appUI.color.Focus;
+      sNode.boundBox.style.borderColor = appUI.color.Focus;
+    } else {
+      res = ["", "", "", "", "", ""];
+      sNode.NW.style.borderColor = appUI.color.Border;
+      sNode.SE.style.borderColor = appUI.color.Border;
+      sNode.boundBox.style.borderColor = appUI.color.Border;
+    }
+    try {
       for (var m = 0; m < res.length; m++) {
-        if (res[m] == null) break;
         here = parm[m];
-        coords.rel[here] = parseInt(res[m]);
-        input[here].value = parseInt(res[m]);
+        input[here].value = res[m];
       };
-      absRes = type[1].split(",");
-      for (var m = 0; m < absRes.length; m++) {
-        if (res[m] == null) break;
-        here = parm[m];
-        coords.abs[here] = parseInt(absRes[m])
-      };
-    })
-    sNode.NW.style.borderColor = appUI.color.Focus;
-    sNode.SE.style.borderColor = appUI.color.Focus;
-    sNode.boundBox.style.borderColor = appUI.color.Focus;
-  } else {
-    res = ["", "", "", "", "", ""];
-    sNode.NW.style.borderColor = appUI.color.Border;
-    sNode.SE.style.borderColor = appUI.color.Border;
-    sNode.boundBox.style.borderColor = appUI.color.Border;
+    } catch(e){return}
   }
-  try {
-    for (var m = 0; m < res.length; m++) {
-      here = parm[m];
-      input[here].value = res[m];
-    };
-  } catch(e){return}
+  lastNum = a;
 }
 
 
@@ -185,16 +194,21 @@ node.forEach(function(v,i,a) {
   v.addEventListener("click", function(e){
     getCoords(v.id);
     var yOff;
-    if (e.shiftKey) {
-      console.log(coords.artB);
+    if (alignSolo) {
       yOff = (coords.artB.index < 1) ? coords.artB.y2 * -1 : coords.artB.y2;
-      csInterface.evalScript(`alignSelection('align', 'artboard', '${v.id}', ${coords.artB.x1}, ${coords.artB.y1}, ${coords.artB.x2}, ${yOff})`);
-    } else if (e.altKey) {
-      yOff = (coords.abs.index < 1) ? coords.abs.y2 * -1 : coords.abs.y2;
-      csInterface.evalScript(`alignSelection('distribute', 'selection', '${v.id}', ${coords.abs.x1}, ${coords.abs.y1}, ${coords.abs.x2}, ${yOff})`);
+      csInterface.evalScript(`alignSingleToArtboard('${v.id}', ${coords.artB.x1}, ${coords.artB.y1}, ${coords.artB.x2}, ${yOff})`);
     } else {
-      yOff = (coords.abs.index < 1) ? coords.rel.y2 : coords.abs.y2;
-      csInterface.evalScript(`alignSelection('align', 'selection', '${v.id}', ${coords.abs.x1}, ${coords.abs.y1}, ${coords.abs.x2}, ${yOff})`);
+      if (e.shiftKey) {
+        console.log(coords.artB);
+        yOff = (coords.artB.index < 1) ? coords.artB.y2 * -1 : coords.artB.y2;
+        csInterface.evalScript(`alignSelection('align', 'artboard', '${v.id}', ${coords.artB.x1}, ${coords.artB.y1}, ${coords.artB.x2}, ${yOff})`);
+      } else if (e.altKey) {
+        yOff = (coords.abs.index < 1) ? coords.abs.y2 * -1 : coords.abs.y2;
+        csInterface.evalScript(`alignSelection('distribute', 'selection', '${v.id}', ${coords.abs.x1}, ${coords.abs.y1}, ${coords.abs.x2}, ${yOff})`);
+      } else {
+        yOff = (coords.abs.index < 1) ? coords.rel.y2 : coords.abs.y2;
+        csInterface.evalScript(`alignSelection('align', 'selection', '${v.id}', ${coords.abs.x1}, ${coords.abs.y1}, ${coords.abs.x2}, ${yOff})`);
+      }
     }
     // console.log(e);
   }, false)

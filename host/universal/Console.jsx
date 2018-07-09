@@ -17,8 +17,8 @@ var err = {
 
 
 function selectScanner() {
-  if (app.selection.length > 1) {
-    return 1;
+  if (app.selection.length > 0) {
+    return app.selection.length;
   } else {
     return 0;
   }
