@@ -1,6 +1,6 @@
 var exist = app.documents.length > 0;
 var hasSelection = app.selection.length > 0;
-var /(horizontal)|x/i = ;
+var nameRX = /(horizontal)|x/i;
 
 // alignObjects('x', 10)
 // alignObjects('horizontal');
