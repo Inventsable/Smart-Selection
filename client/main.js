@@ -126,7 +126,7 @@ function scanningSelection(state) {
 function scanResults(a) {
   var res, here, type;
   var parm = ["x1", "y1", "x2", "y2", "w", "h"];
-  if (a !== lastNum) {
+  // if (a !== lastNum) {
     if (a == 1)
       alignSolo = true;
     if (a > 0) {
@@ -164,8 +164,9 @@ function scanResults(a) {
         input[here].value = res[m];
       };
     } catch(e){return}
-  }
+  // }
   lastNum = a;
+  console.log(a);
 }
 
 
@@ -205,6 +206,9 @@ node.forEach(function(v,i,a) {
       } else if (e.altKey) {
         yOff = (coords.abs.index < 1) ? coords.abs.y2 * -1 : coords.abs.y2;
         csInterface.evalScript(`alignSelection('distribute', 'selection', '${v.id}', ${coords.abs.x1}, ${coords.abs.y1}, ${coords.abs.x2}, ${yOff})`);
+      } else if (e.ctrlKey) {
+        yOff = (coords.abs.index < 1) ? coords.abs.y2 * -1 : coords.abs.y2;
+        csInterface.evalScript(`alignSelection('distributeEven', 'selection', '${v.id}', ${coords.abs.x1}, ${coords.abs.y1}, ${coords.abs.x2}, ${yOff})`);
       } else {
         yOff = (coords.abs.index < 1) ? coords.rel.y2 : coords.abs.y2;
         csInterface.evalScript(`alignSelection('align', 'selection', '${v.id}', ${coords.abs.x1}, ${coords.abs.y1}, ${coords.abs.x2}, ${yOff})`);

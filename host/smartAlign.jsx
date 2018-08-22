@@ -90,22 +90,12 @@ function alignSingleToArtboard(alignCompass, x1, y1, x2, y2) {
   var inverted = false;
   var indexAB = app.documents[0].artboards.getActiveArtboardIndex();
   var boundsAB = app.documents[0].artboards[indexAB].artboardRect;
-
-  // alert()
-
   if (indexAB < 1)
     inverted = true;
-
   var minX = x1;
   var maxX = x2;
   var minY = y1;
   var maxY = y2;
-
-  // var minX = boundsAB[0];
-  // var maxX = boundsAB[2];
-  // var minY = boundsAB[1];
-  // var maxY = boundsAB[3] * -1;
-
   var midX = (minX + (maxX - minX) / 2);
   var midY = (minY + (maxY - minY) / 2);
 
@@ -186,7 +176,7 @@ function alignSingleToArtboard(alignCompass, x1, y1, x2, y2) {
 }
 
 
-/** @TenA
+/** based on @TenA's response from
 https://forums.adobe.com/thread/2111711  **/
 function alignSelection(alignType, alignTarget, alignCompass, x1, y1, x2, y2) {
   var refBnds;
@@ -207,9 +197,32 @@ function alignSelection(alignType, alignTarget, alignCompass, x1, y1, x2, y2) {
   var midY = (minY + (maxY - minY) / 2);
   var boxW = maxX - minX;
   var boxH = maxY - minY;
+  boxW = (boxW < 0) ? boxW * -1 : boxW;
+  boxH = (boxH < 0) ? boxH * -1 : boxH;
 
-  // alert(minX + ' ' + minY + " " + maxX + " " + maxY + "\r" + midX + " " + midY)
+// calculate for Distributes
+  var first = 0;
+  var last = app.selection.length - 1;
+  var startX = app.selection[0].width + minX;
+  var endX = maxX - app.selection[last].width;
+  var startY = app.selection[0].height + minY;
+  var endY = maxY - app.selection[last].height;
+  // var blendRect = [startX, startY, endX, endY];
+  // var blendW = blendRect[2] - blendRect[0];
+  // var blendH = blendRect[3] - blendRect[1];
+  var childrenW = app.selection[first].width + app.selection[last].width;
+  var childrenH = app.selection[first].height + app.selection[last].height;
+  for (var ii = 1; ii < last; ii++) {
+    childrenW = childrenW + app.selection[ii].width;
+    childrenH = childrenH + app.selection[ii].height;
+  }
+  var remainderW = boxW - childrenW;
+  var remainderH = boxH - childrenH;
+  var evenX = remainderW / (app.selection.length - 1);
+  var evenY = remainderH / (app.selection.length - 1);
 
+  // alert(boxH + " - " + childrenH + " = " + remainderH + " / " + last + " = " + evenY)
+  // alert("totalW: " + boxW + ", childW: " + childrenW + ", remainder: " + remainderW + "\rtotalH: " + boxH + "childH: " + childrenH + ", remainder: " + remainderH);
 
   for (var i = 0; i < app.selection.length; i++) {
     var target = app.selection[i];
@@ -272,66 +285,113 @@ function alignSelection(alignType, alignTarget, alignCompass, x1, y1, x2, y2) {
           else
             target.position = [maxX - wd, maxY + ht];
           break;
-        case 'xAxis':
+        case 'verticalCenter':
           if (inverted)
-            target.position = [bounds[0], (midY - ht) * -1];
+            target.position = [bounds[0], (midY - ht / 2) * -1];
           else
-            target.position = [bounds[0], maxY - ht];
+            target.position = [bounds[0], midY + ht / 2];
           break;
-        case 'yAxis':
+        case 'verticalTop':
+          if (inverted)
+            target.position = [bounds[0], minY * -1];
+          else
+            target.position = [bounds[0], minY];
+          break;
+        case 'verticalBottom':
+          if (inverted)
+            target.position = [bounds[0], (maxY - ht) * -1];
+          else
+            target.position = [bounds[0], maxY + ht];
+          break;
+        case 'horizontalCenter':
           if (inverted)
             target.position = [midX - wd / 2, bounds[1]];
           else
             target.position = [midX - wd / 2, bounds[1]];
+          break;
+        case 'horizontalLeft':
+          if (inverted)
+            target.position = [minX, bounds[1]];
+          else
+            target.position = [minX, bounds[1]];
+          break;
+        case 'horizontalRight':
+        if (inverted)
+            target.position = [maxX - wd, bounds[1]];
+          else
+            target.position = [maxX - wd, bounds[1]];
           break;
         default:
           alert(alignCompass);
           break;
       }
-    } else {
-      var first = 0;
-      var last = app.selection.length - 1;
-      var startX = app.selection[0].width + minX;
-      var endX = maxX - app.selection[last].width;
-      var startY = app.selection[0].height + minY;
-      var endY = maxY - app.selection[last].height;
-      var blendRect = [startX, startY, endX, endY];
-      var blendW = blendRect[2] - blendRect[0];
-      var blendH = blendRect[3] - blendRect[1];
-      var childrenW = 0;
-      var childrenH = 0;
-      for (var ii = 1; ii < app.selection.length - 1; ii++) {
-        childrenW = childrenW + app.selection[ii].width;
-        childrenH = childrenH + app.selection[ii].height;
-      }
-      var remainderW = blendW - childrenW;
-      var remainderH = blendH - childrenH;
-      var offsetWNum = remainderW / (app.selection.length - 1);
-      var offsetHNum = remainderH / (app.selection.length - 1);
+    } else if (alignType === 'distribute') {
+      var offsetWNum = boxW / (app.selection.length - 1);
+      var offsetHNum = boxH / (app.selection.length - 1);
       switch(alignCompass){
-        case 'Center':
+        case 'NW':
           if (inverted) {
             if (i == first) {
               target.position = [minX, minY];
             } else if (i == last) {
               target.position = [maxX - wd, (maxY * -1) + ht];
             } else {
-              // target.position = [startX + (offsetWNum * i) - (wd / 2), ((offsetHNum * i) - (ht / 2)) * -1];
-              target.position = [startX + (offsetWNum * i) + (wd / 2), (startY + (offsetHNum * i) + (ht / 2)) * -1];
+              target.position = [minX + (offsetWNum * i) - (wd / 2), minY + ((offsetHNum * i) - (ht / 2)) * -1];
             }
           } else {
-            // target.position = [minX + (offsetWNum * i), minY];
+            if (i == first) {
+              target.position = [minX, minY];
+            } else if (i == last) {
+              target.position = [maxX - wd, (maxY) + ht];
+            } else {
+              target.position = [minX + (offsetWNum * i) - (wd / 2), minY - ((offsetHNum * i) + (ht / 2))];
+            }
           }
           break;
-
+      }
+    } else if (alignType === 'distributeEven') {
+      // var offsetWNum = boxW / (app.selection.length - 1);
+      // var offsetHNum = boxH / (app.selection.length - 1);
+      switch(alignCompass){
+        case 'NW':
+          if (inverted) {
+            if (i == first) {
+              target.position = [minX, minY];
+            } else if (i == last) {
+              target.position = [maxX - wd, (maxY * -1) + ht];
+            } else {
+              var prevXPos = app.selection[i-1].geometricBounds[0];
+              var prevWidth = app.selection[i-1].width;
+              var prevYPos = app.selection[i-1].geometricBounds[1];
+              var prevHeight = app.selection[i-1].height;
+              prevYPos = (prevYPos < 0) ? prevYPos * -1 : prevYPos;
+              target.position = [prevXPos + prevWidth + evenX, (prevYPos + prevHeight + evenY) * -1];
+            }
+          } else {
+            if (i == first) {
+              target.position = [minX, minY];
+            } else if (i == last) {
+              target.position = [maxX - wd, (maxY) + ht];
+            } else {
+              var prevXPos = app.selection[i-1].geometricBounds[0];
+              var prevWidth = app.selection[i-1].width;
+              var prevYPos = app.selection[i-1].geometricBounds[1];
+              var prevHeight = app.selection[i-1].height;
+              // alert(prevYPos + " " + prevHeight + " " + evenY)
+              target.position = [prevXPos + prevWidth + evenX, prevYPos - prevHeight - evenY];
+              // target.position = [startX + (offsetWNum * i) - ]
+              // alt:
+              // target.position = [startX + (offsetWNum * i) + (wd / 2), (startY + (offsetHNum * i) + (ht / 2)) * -1];
+            }
+          }
+          break;
       }
     }
   }
 }
 
 // alert(app.selection[app.selection.length - 1].width - app.selection[0].width)
-
-// alignSelection('distribute', 'selection', 'Center', 0, 0, 100, 100)
+// alignSelection('align', 'selection', 'horizontalCenter', 0, 0, 100, 100)
 
 
 function roundTo(n, digits) {

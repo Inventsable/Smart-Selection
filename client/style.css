@@ -13,6 +13,7 @@
   /* border: 2px solid red; */
   width: 100%;
   height: auto;
+  align-items: center;
 }
 
 
@@ -60,6 +61,16 @@
   background-color: var(--colorHover);
   border-color: var(--colorIcon);
 }
+
+
+#E, #W {
+  height: 4rem;
+}
+
+#N, #S {
+  width: 60%;
+}
+
 
 .prefix {
   display: flex;
