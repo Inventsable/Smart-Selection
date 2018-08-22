@@ -1,6 +1,8 @@
-## Smart Selection
+# Smart Selection
 
-Helper panel to build contextual smart align functions:
+## Merged with [Smart Align](https://github.com/Inventsable/Smart-Align)
+
+Helper panel to build contextual [Smart Align](https://github.com/Inventsable/Smart-Align) functions:
 
 ![Selection toggle](https://thumbs.gfycat.com/ReadyLividFrogmouth-size_restricted.gif)
 
