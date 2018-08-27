@@ -15,7 +15,7 @@ function alignObjects() {
 
     // Get the [x1, y1, x2, y2] array for the bounding box of our current selection
     var fullRect = getBounds(app.selection);
-    // Centerpoint positions for total selection:
+    // Centerpoint positions for total selection is width/2 or height/2:
     var verticalMidpoint = (fullRect[2] - fullRect[0])/2;
     var horizontalMidpoint = (fullRect[3] - fullRect[1])/2;
 
